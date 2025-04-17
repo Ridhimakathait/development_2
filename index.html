@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calm - Meditation & Sleep</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: 'Avenir', -apple-system, BlinkMacSystemFont, sans-serif; }
+        .gradient-bg { background: linear-gradient(135deg, #3F65C2, #6B9AC4); }
+        .dropdown:hover .dropdown-menu { display: block; }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <!-- Header -->
+    <header class="bg-white shadow-sm sticky top-0 z-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center py-4">
+            <img src="https://www.calm.com/images/calm-logo.svg" alt="Calm Logo" class="h-8">
+            <nav class="flex space-x-4">
+                <div class="relative dropdown">
+                    <button class="text-gray-700 hover:text-gray-900">Explore</button>
+                    <div class="dropdown-menu hidden absolute bg-white shadow-lg rounded-md mt-2">
+                        <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Meditation</a>
+                        <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Sleep</a>
+                        <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Music</a>
+                    </div>
+                </div>
+                <a href="#" class="text-gray-700 hover:text-gray-900">Pricing</a>
+                <a href="#" class="text-gray-700 hover:text-gray-900">Blog</a>
+                <button class="bg-[#3F65C2] text-white px-4 py-2 rounded-md hover:bg-[#2F4A9B]">Try Calm</button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="gradient-bg text-white py-20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h1 class="text-4xl md:text-5xl font-bold mb-4">Find Your Calm</h1>
+            <p class="text-lg mb-8">Meditate, sleep, and relax with Calm’s guided sessions and soothing sounds.</p>
+            <button class="bg-white text-[#3F65C2] px-6 py-3 rounded-md text-lg hover:bg-gray-100">Start Your Journey</button>
+        </div>
+    </section>
+
+    <!-- Custom Meditation Builder -->
+    <section class="py-16 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="text-3xl font-bold text-gray-900 mb-8 text-center">Build Your Custom Meditation</h2>
+            <div class="bg-gray-50 p-6 rounded-lg shadow-md max-w-2xl mx-auto">
+                <div class="mb-4">
+                    <label class="block text-gray-700 mb-2">Duration (minutes)</label>
+                    <input id="duration" type="number" min="1" max="60" class="w-full p-2 border rounded-md" placeholder="e.g., 10">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 mb-2">Background Sound</label>
+                    <select id="sound" class="w-full p-2 border rounded-md">
+                        <option value="rain">Rain</option>
+                        <option value="ocean">Ocean Waves</option>
+                        <option value="forest">Forest</option>
+                    </select>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 mb-2">Guided Prompt</label>
+                    <select id="prompt" class="w-full p-2 border rounded-md">
+                        <option value="mindfulness">Mindfulness</option>
+                        <option value="stress">Stress Relief</option>
+                        <option value="focus">Focus</option>
+                    </select>
+                </div>
+                <button onclick="previewMeditation()" class="bg-[#3F65C2] text-white px-4 py-2 rounded-md w-full hover:bg-[#2F4A9B]">Preview Meditation</button>
+                <button onclick="saveMeditation()" class="bg-gray-700 text-white px-4 py-2 rounded-md w-full mt-2 hover:bg-gray-800">Save Meditation</button>
+                <div id="preview-player" class="mt-4 hidden">
+                    <p class="text-gray-700 mb-2">Preview:</p>
+                    <div class="w-full bg-gray-200 rounded-full h-2.5">
+                        <div id="progress-bar" class="bg-[#3F65C2] h-2.5 rounded-full" style="width: 0%"></div>
+                    </div>
+                    <button onclick="stopPreview()" class="mt-2 text-gray-700 underline">Stop</button>
+                </div>
+                <div id="saved-sessions" class="mt-4"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">Calm</h3>
+                    <p>Transform your day with mindfulness and sleep.</p>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">Links</h3>
+                    <a href="#" class="block text-gray-400 hover:text-white">About</a>
+                    <a href="#" class="block text-gray-400 hover:text-white">Support</a>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">Follow Us</h3>
+                    <a href="#" class="block text-gray-400 hover:text-white">Instagram</a>
+                    <a href="#" class="block text-gray-400 hover:text-white">Twitter</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        let audioContext;
+        let oscillator;
+        let isPlaying = false;
+
+        function previewMeditation() {
+            const duration = parseInt(document.getElementById('duration').value) || 1;
+            const sound = document.getElementById('sound').value;
+            const prompt = document.getElementById('prompt').value;
+
+            // Simulate audio preview (Web Audio API)
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (oscillator) oscillator.stop();
+            oscillator = audioContext.createOscillator();
+            oscillator.type = 'sine';
+            oscillator.frequency.setValueAtTime(sound === 'rain' ? 200 : sound === 'ocean' ? 150 : 100, audioContext.currentTime);
+            oscillator.connect(audioContext.destination);
+            oscillator.start();
+            isPlaying = true;
+
+            // Show progress bar
+            const player = document.getElementById('preview-player');
+            const progressBar = document.getElementById('progress-bar');
+            player.classList.remove('hidden');
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += 100 / (duration * 60);
+                progressBar.style.width = `${Math.min(progress, 100)}%`;
+                if (progress >= 100 || !isPlaying) {
+                    clearInterval(interval);
+                    stopPreview();
+                }
+            }, 1000);
+
+            // Display session info
+            document.getElementById('preview-player').innerHTML += `<p class="mt-2 text-gray-600">Playing: ${prompt} with ${sound} sound for ${duration} min</p>`;
+        }
+
+        function stopPreview() {
+            if (oscillator) {
+                oscillator.stop();
+                isPlaying = false;
+            }
+            document.getElementById('preview-player').classList.add('hidden');
+            document.getElementById('progress-bar').style.width = '0%';
+        }
+
+        function saveMeditation() {
+            const duration = document.getElementById('duration').value || '10';
+            const sound = document.getElementById('sound').value;
+            const prompt = document.getElementById('prompt').value;
+            const session = { duration, sound, prompt, id: Date.now() };
+            const savedSessions = JSON.parse(localStorage.getItem('meditationSessions') || '[]');
+            savedSessions.push(session);
+            localStorage.setItem('meditationSessions', JSON.stringify(savedSessions));
+            displaySavedSessions();
+        }
+
+        function displaySavedSessions() {
+            const savedSessions = JSON.parse(localStorage.getItem('meditationSessions') || '[]');
+            const sessionsDiv = document.getElementById('saved-sessions');
+            sessionsDiv.innerHTML = '<h3 class="text-xl font-semibold mb-2">Saved Sessions</h3>';
+            if (savedSessions.length === 0) {
+                sessionsDiv.innerHTML += '<p class="text-gray-600">No saved sessions yet.</p>';
+                return;
+            }
+            savedSessions.forEach(session => {
+                sessionsDiv.innerHTML += `
+                    <div class="bg-white p-4 rounded-md shadow-sm mb-2">
+                        <p><strong>${session.prompt}</strong> with ${session.sound} for ${session.duration} min</p>
+                        <button onclick="loadSession(${session.id})" class="text-[#3F65C2] underline">Load</button>
+                    </div>
+                `;
+            });
+        }
+
+        function loadSession(id) {
+            const savedSessions = JSON.parse(localStorage.getItem('meditationSessions') || '[]');
+            const session = savedSessions.find(s => s.id === id);
+            if (session) {
+                document.getElementById('duration').value = session.duration;
+                document.getElementById('sound').value = session.sound;
+                document.getElementById('prompt').value = session.prompt;
+                previewMeditation();
+            }
